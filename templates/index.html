@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Receipt Processor - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9ff;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 10px;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(240, 147, 251, 0.3);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .file-list {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .file-item {
+            background: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-item .filename {
+            font-weight: 500;
+        }
+
+        .file-item .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .progress-section {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .current-processing {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .individual-result {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideIn 0.5s ease forwards;
+            position: relative;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .result-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .result-error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .result-meta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .result-meta-item {
+            margin: 2px 0;
+        }
+
+        .result-items {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .result-item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .mini-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mini-stat {
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .mini-stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .mini-stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .items-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            background: #f8f9ff;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .table-header h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .editable {
+            background: none;
+            border: 1px solid transparent;
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .editable:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .editable:focus {
+            outline: none;
+            border-color: #764ba2;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .editable-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .update-btn {
+            background: #11998e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .update-btn:hover {
+            background: #0f8a7f;
+            transform: translateY(-1px);
+        }
+
+        .update-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .remove-item-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .remove-item-btn:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+        }
+
+        .update-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffc107;
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            display: none;
+        }
+
+        .updating .update-indicator {
+            display: block;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #b8daff;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .action-cell {
+            white-space: nowrap;
+        }
+
+        .row-removing {
+            opacity: 0.5;
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .summary-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .mini-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.9em;
+                min-width: 600px;
+            }
+            
+            .items-table {
+                overflow-x: auto;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .save-btn, .download-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="connectionStatus" class="connection-status status-disconnected">
+        🔴 Checking connection...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🧾 Smart Receipt Processor</h1>
+            <p>Upload multiple receipts with synchronized real-time updates</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section" id="uploadSection">
+                <h3>📁 Upload Receipt Images</h3>
+                <p>Drag and drop files here or click to select</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    📤 Select Files
+                </button>
+                
+                <div class="file-list" id="fileList"></div>
+                
+                <button class="process-btn" id="processBtn" onclick="processReceiptsProgressive()" disabled>
+                    🚀 Process Receipts
+                </button>
+                <button class="clear-btn" onclick="clearAll()">
+                    🗑️ Clear All
+                </button>
+                <button class="clear-btn" onclick="testConnection()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    🔧 Test Connection
+                </button>
+                <button class="clear-btn" onclick="debugData()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    🐛 Debug Data
+                </button>
+            </div>
+
+            <div class="progress-section" id="progressSection">
+                <div class="progress-header">
+                    <h3>📊 Processing Progress</h3>
+                    <span id="progressCounter">0 / 0</span>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="progress-text" id="progressText">Ready to start...</div>
+                
+                <div class="current-processing" id="currentProcessing" style="display: none;">
+                    🔄 Processing: <span id="currentFilename">file.jpg</span>
+                </div>
+                
+                <div id="individualResults"></div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="summary-card">
+                    <h2>📈 Final Shopping Summary</h2>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalItems">0</span>
+                            <span class="stat-label">Total Items</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalCost">₹0.00</span>
+                            <span class="stat-label">Total Cost</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="receiptCount">0</span>
+                            <span class="stat-label">Receipts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="save-btn" onclick="saveChanges()">
+                        💾 Save Changes
+                    </button>
+                    <button class="download-btn" onclick="downloadList()">
+                        📥 Download Summary
+                    </button>
+                </div>
+
+                <div class="items-table">
+                    <div class="table-header">
+                        <h3>🛒 Items Breakdown</h3>
+                        <p>Edit item names, quantities and prices directly in the table. Remove items you don't need.</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Avg Price</th>
+                                <th>Total</th>
+                                <th>Receipts</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let currentData = null;
+        let isProcessing = false;
+        let individualResultCards = {};
+        let rawReceiptData = [];
+        let hasUnsavedChanges = false;
+
+        const CONFIG = {
+            backendUrl: 'http://localhost:8000',
+            retryAttempts: 3,
+            retryDelay: 1000
+        };
+
+        // File handling
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        
+        const uploadSection = document.getElementById('uploadSection');
+        uploadSection.addEventListener('dragover', handleDragOver);
+        uploadSection.addEventListener('dragleave', handleDragLeave);
+        uploadSection.addEventListener('drop', handleDrop);
+
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/health`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateConnectionStatus(true, data);
+                    return true;
+                } else {
+                    updateConnectionStatus(false, `Server error: ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                updateConnectionStatus(false, error.message);
+                return false;
+            }
+        }
+
+        function updateConnectionStatus(connected, info = null) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.className = 'connection-status status-connected';
+                statusEl.innerHTML = '🟢 Backend Connected';
+                if (info && info.ollama_connected === false) {
+                    statusEl.innerHTML += ' (Ollama Offline)';
+                }
+            } else {
+                statusEl.className = 'connection-status status-disconnected';
+                statusEl.innerHTML = '🔴 Backend Disconnected';
+            }
+        }
+
+        async function testConnection() {
+            showAlert('Testing connection...', 'info');
+            const connected = await checkConnection();
+            if (connected) {
+                showAlert('✅ Connection successful! Backend is ready.', 'success');
+            } else {
+                showAlert('❌ Connection failed. Please check if the backend is running on ' + CONFIG.backendUrl, 'error');
+            }
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            addFiles(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            uploadSection.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            uploadSection.classList.remove('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = Array.from(event.dataTransfer.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            
+            if (imageFiles.length !== files.length) {
+                showAlert(`${files.length - imageFiles.length} non-image files were ignored. Only image files are supported.`, 'warning');
+            }
+            
+            selectedFiles = [...selectedFiles, ...imageFiles];
+            updateFileList();
+            updateProcessButton();
+        }
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+
+            fileList.innerHTML = `
+                <h4>Selected Files (${selectedFiles.length}):</h4>
+                ${selectedFiles.map((file, index) => `
+                    <div class="file-item">
+                        <span class="filename">${file.name} (${formatFileSize(file.size)})</span>
+                        <button class="remove-btn" onclick="removeFile(${index})" ${isProcessing ? 'disabled' : ''}>Remove</button>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeFile(index) {
+            if (isProcessing) return;
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateProcessButton();
+        }
+
+        function updateProcessButton() {
+            const processBtn = document.getElementById('processBtn');
+            processBtn.disabled = selectedFiles.length === 0 || isProcessing;
+        }
+
+        async function processReceiptsProgressive() {
+            if (selectedFiles.length === 0) {
+                showAlert('Please select at least one image file.', 'error');
+                return;
+            }
+
+            const connected = await checkConnection();
+            if (!connected) {
+                showAlert('Cannot connect to backend server. Please ensure the server is running on ' + CONFIG.backendUrl, 'error');
+                return;
+            }
+
+            isProcessing = true;
+            hasUnsavedChanges = false;
+            updateProcessButton();
+            updateFileList();
+            
+            // Reset data
+            individualResultCards = {};
+            rawReceiptData = [];
+            currentData = null;
+
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('individualResults').innerHTML = '';
+            
+            updateProgress(0, selectedFiles.length, 'Starting processing...');
+
+            const formData = new FormData();
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/upload-progressive`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        console.log('Stream complete');
+                        break;
+                    }
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                handleProgressiveData(data);
+                            } catch (e) {
+                                console.warn('Failed to parse streaming data:', line);
+                            }
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error in progressive processing:', error);
+                showAlert(`Processing failed: ${error.message}`, 'error');
+            } finally {
+                isProcessing = false;
+                updateProcessButton();
+                updateFileList();
+                hideCurrentProcessing();
+            }
+        }
+
+        function handleProgressiveData(data) {
+            console.log('Received data:', data);
+
+            switch (data.type) {
+                case 'progress':
+                    updateProgress(data.current, data.total, `Processing ${data.filename}...`);
+                    showCurrentProcessing(data.filename);
+                    break;
+
+                case 'individual_result':
+                    hideCurrentProcessing();
+                    
+                    if (data.result.status === 'success') {
+                        rawReceiptData.push(data.result);
+                    }
+                    
+                    displayIndividualResult(data.result, data.summary);
+                    break;
+
+                case 'complete':
+                    updateProgress(data.processing_results.length, data.processing_results.length, 'Processing complete!');
+                    hideCurrentProcessing();
+                    
+                    currentData = data.summary;
+                    console.log('Final summary received:', currentData);
+                    
+                    if (currentData && currentData.items && currentData.items.length > 0) {
+                        displayFinalResults(currentData);
+                    } else {
+                        console.log('No items in summary, checking raw data:', rawReceiptData);
+                        showAlert('⚠️ No items found in summary. Check individual results.', 'warning');
+                    }
+                    
+                    showAlert('✅ All receipts processed successfully!', 'success');
+                    break;
+            }
+        }
+
+        function updateProgress(current, total, message) {
+            const percentage = total > 0 ? (current / total) * 100 : 0;
+            
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressCounter').textContent = `${current} / ${total}`;
+            document.getElementById('progressText').textContent = message;
+        }
+
+        function showCurrentProcessing(filename) {
+            const currentProcessing = document.getElementById('currentProcessing');
+            document.getElementById('currentFilename').textContent = filename;
+            currentProcessing.style.display = 'block';
+        }
+
+        function hideCurrentProcessing() {
+            document.getElementById('currentProcessing').style.display = 'none';
+        }
+
+        function displayIndividualResult(result, summary) {
+            const resultsContainer = document.getElementById('individualResults');
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `individual-result ${result.status === 'success' ? 'result-success' : 'result-error'}`;
+            resultDiv.id = `result-${result.filename.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            
+            individualResultCards[result.filename] = resultDiv;
+            
+            let itemsHTML = '';
+            let metaHTML = '';
+            
+            if (result.status === 'success') {
+                metaHTML = `
+                    <div class="result-meta">
+                        <div class="result-meta-item">🏪 <strong>Store:</strong> ${result.store || 'Unknown Store'}</div>
+                        <div class="result-meta-item">📅 <strong>Date:</strong> ${result.date || 'Unknown Date'}</div>
+                    </div>
+                `;
+                
+                if (result.items && result.items.length > 0) {
+                    itemsHTML = `
+                        <div class="result-items">
+                            <strong>Items Found (${result.items.length}):</strong>
+                            ${result.items.map(item => `
+                                <div class="result-item-row" data-item-name="${item.name}">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-details">${item.quantity}x ₹${item.unit_price.toFixed(2)} = ₹${item.total_price.toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            }
+            
+            const receiptItemCount = result.items ? result.items.length : 0;
+            
+            resultDiv.innerHTML = `
+                <div class="update-indicator">Updating...</div>
+                <div class="result-header">
+                    <div>
+                        <strong>${result.filename}</strong>
+                        ${result.status === 'error' ? 
+                            `<br><small style="color: #dc3545;">❌ ${result.message}</small>` : ''
+                        }
+                    </div>
+                    <div style="font-size: 1.5em;">
+                        ${result.status === 'success' ? '✅' : '❌'}
+                    </div>
+                </div>
+                ${metaHTML}
+                ${itemsHTML}
+                <div class="mini-summary">
+                    <strong>Receipt Summary</strong>
+                    <div class="mini-stats">
+                        <div class="mini-stat">
+                            <span class="mini-stat-value">${receiptItemCount}</span>
+                            <span class="mini-stat-label">Items</span>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="mini-stat-value">₹${result.items ? result.items.reduce((sum, item) => sum + item.total_price, 0).toFixed(2) : '0.00'}</span>
+                            <span class="mini-stat-label">Receipt Total</span>
+                        </div>
+                        <div class="mini-stat">
+                            <span class="mini-stat-value">${summary.receipt_count || 0}</span>
+                            <span class="mini-stat-label">Total Receipts</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <strong>Global Total: ₹${summary.total_cost ? summary.total_cost.toFixed(2) : '0.00'}</strong>
+                    </div>
+                </div>
+            `;
+            
+            resultsContainer.appendChild(resultDiv);
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function updateIndividualResultCard(filename, summary) {
+            const resultCard = individualResultCards[filename];
+            if (!resultCard) return;
+            
+            const globalTotalElement = resultCard.querySelector('.mini-summary div:last-child strong');
+            if (globalTotalElement) {
+                globalTotalElement.textContent = `Global Total: ₹${summary.total_cost ? summary.total_cost.toFixed(2) : '0.00'}`;
+            }
+            
+            const totalReceiptsElement = resultCard.querySelector('.mini-stat-value:last-of-type');
+            if (totalReceiptsElement && totalReceiptsElement.parentElement.querySelector('.mini-stat-label').textContent === 'Total Receipts') {
+                totalReceiptsElement.textContent = summary.receipt_count || 0;
+            }
+            
+            const itemRows = resultCard.querySelectorAll('.result-item-row');
+            itemRows.forEach(row => {
+                const itemName = row.getAttribute('data-item-name');
+                const summaryItem = summary.items?.find(item => 
+                    item.name.toLowerCase().trim() === itemName.toLowerCase().trim()
+                );
+                if (summaryItem) {
+                    const itemDetails = row.querySelector('.item-details');
+                    if (itemDetails) {
+                        const originalQuantity = parseFloat(itemDetails.textContent.match(/(\d+(?:\.\d+)?)x/)?.[1] || '1');
+                        itemDetails.textContent = `${originalQuantity}x ₹${summaryItem.average_price.toFixed(2)} = ₹${(originalQuantity * summaryItem.average_price).toFixed(2)}`;
+                    }
+                }
+            });
+        }
+
+        function displayFinalResults(data) {
+            console.log('Displaying final results:', data);
+            
+            if (!data || !data.items || data.items.length === 0) {
+                showAlert('No items were extracted from the receipts. Please check image quality and try again.', 'info');
+                return;
+            }
+
+            // FIXED: Ensure all items are displayed, including first items
+            console.log(`Processing ${data.items.length} items for display`);
+
+            // Update summary stats
+            document.getElementById('totalItems').textContent = data.items.length;
+            document.getElementById('totalCost').textContent = `₹${data.total_cost.toFixed(2)}`;
+            document.getElementById('receiptCount').textContent = data.receipt_count;
+
+            // FIXED: Enhanced items table generation with proper error handling
+            const tbody = document.getElementById('itemsTableBody');
+            tbody.innerHTML = data.items.map((item, index) => {
+                // Ensure item data integrity
+                const itemName = item.name && item.name.trim() ? item.name.trim() : `Item ${index + 1}`;
+                const itemId = item.id !== undefined ? item.id : `item-${index}`;
+                const quantity = item.quantity || 1;
+                const avgPrice = item.average_price || 0;
+                const totalPrice = item.total_price || (quantity * avgPrice);
+                const receiptCount = item.receipt_count || 1;
+                
+                console.log(`Rendering item ${index + 1}: ${itemName} (${quantity}x₹${avgPrice})`);
+                
+                return `
+                    <tr data-item-id="${itemId}" data-original-name="${itemName}" id="item-row-${index}">
+                        <td>
+                            <input type="text" class="editable editable-name" value="${itemName}" 
+                                   data-field="name" data-original-value="${itemName}" 
+                                   onchange="markUnsavedChanges()">
+                        </td>
+                        <td>
+                            <input type="number" class="editable" value="${quantity}" 
+                                   step="0.1" min="0" data-field="quantity" data-original-value="${quantity}"
+                                   onchange="markUnsavedChanges(); updateRowTotal(this)">
+                        </td>
+                        <td>
+                            <input type="number" class="editable" value="${avgPrice}" 
+                                   step="0.01" min="0" data-field="price" data-original-value="${avgPrice}"
+                                   onchange="markUnsavedChanges(); updateRowTotal(this)">
+                        </td>
+                        <td><strong class="row-total">₹${totalPrice.toFixed(2)}</strong></td>
+                        <td>
+                            <span class="badge">${receiptCount} receipt${receiptCount > 1 ? 's' : ''}</span>
+                        </td>
+                        <td class="action-cell">
+                            <button class="update-btn" onclick="updateItem('${itemName}', this)" data-original-name="${itemName}">Update</button>
+                            <button class="remove-item-btn" onclick="removeItem('${itemName}', this)" data-item-name="${itemName}">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            console.log(`Final table rendered with ${data.items.length} rows`);
+
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateRowTotal(input) {
+            const row = input.closest('tr');
+            const quantityInput = row.querySelector('[data-field="quantity"]');
+            const priceInput = row.querySelector('[data-field="price"]');
+            const totalCell = row.querySelector('.row-total');
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+            
+            totalCell.textContent = `₹${total.toFixed(2)}`;
+            
+            // Update grand total
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal() {
+            const rows = document.querySelectorAll('#itemsTableBody tr:not(.row-removing)');
+            let grandTotal = 0;
+            
+            rows.forEach(row => {
+                const quantityInput = row.querySelector('[data-field="quantity"]');
+                const priceInput = row.querySelector('[data-field="price"]');
+                
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                
+                grandTotal += quantity * price;
+            });
+            
+            document.getElementById('totalCost').textContent = `₹${grandTotal.toFixed(2)}`;
+            document.getElementById('totalItems').textContent = rows.length;
+        }
+
+        function markUnsavedChanges() {
+            hasUnsavedChanges = true;
+            // Visual indication of unsaved changes
+            document.querySelector('.save-btn').style.animation = 'pulse 1s infinite';
+        }
+
+        async function updateItem(originalName, buttonElement) {
+            const row = buttonElement.closest('tr');
+            const nameInput = row.querySelector('[data-field="name"]');
+            const quantityInput = row.querySelector('[data-field="quantity"]');
+            const priceInput = row.querySelector('[data-field="price"]');
+            
+            const newName = nameInput.value.trim();
+            const quantity = parseFloat(quantityInput.value);
+            const price = parseFloat(priceInput.value);
+
+            if (!newName || isNaN(quantity) || isNaN(price) || quantity <= 0 || price <= 0) {
+                showAlert('Please enter valid item name, quantity and price values.', 'error');
+                return;
+            }
+
+            row.classList.add('updating');
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<div class="loading-spinner"></div>';
+
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/update-item`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        old_name: originalName,
+                        new_name: newName,
+                        quantity: quantity,
+                        price: price
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    throw new Error(`HTTP ${response.status}: ${errorData.detail || response.statusText}`);
+                }
+
+                const result = await response.json();
+                currentData = result.summary;
+                
+                console.log('Update result:', result);
+                
+                displayFinalResults(result.summary);
+                
+                Object.keys(individualResultCards).forEach(filename => {
+                    updateIndividualResultCard(filename, result.summary);
+                });
+                
+                hasUnsavedChanges = false;
+                document.querySelector('.save-btn').style.animation = 'none';
+                showAlert(`✅ Item "${newName}" updated successfully!`, 'success');
+
+            } catch (error) {
+                console.error('Error updating item:', error);
+                showAlert(`❌ Error updating item: ${error.message}`, 'error');
+                
+                nameInput.value = nameInput.getAttribute('data-original-value');
+                quantityInput.value = quantityInput.getAttribute('data-original-value');
+                priceInput.value = priceInput.getAttribute('data-original-value');
+                updateRowTotal(quantityInput);
+                
+            } finally {
+                row.classList.remove('updating');
+                buttonElement.disabled = false;
+                buttonElement.textContent = 'Update';
+            }
+        }
+
+        async function removeItem(itemName, buttonElement) {
+            if (!confirm(`Are you sure you want to remove "${itemName}" from the list?`)) {
+                return;
+            }
+
+            const row = buttonElement.closest('tr');
+            row.classList.add('row-removing');
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<div class="loading-spinner"></div>';
+
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/remove-item`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        item_name: itemName
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                    throw new Error(`HTTP ${response.status}: ${errorData.detail || response.statusText}`);
+                }
+
+                const result = await response.json();
+                currentData = result.summary;
+                
+                // Remove row with animation
+                setTimeout(() => {
+                    row.remove();
+                    updateGrandTotal();
+                    
+                    // Update individual result cards
+                    Object.keys(individualResultCards).forEach(filename => {
+                        updateIndividualResultCard(filename, result.summary);
+                    });
+                    
+                    showAlert(`✅ Item "${itemName}" removed successfully!`, 'success');
+                }, 300);
+
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showAlert(`❌ Error removing item: ${error.message}`, 'error');
+                
+                // Restore row
+                row.classList.remove('row-removing');
+                buttonElement.disabled = false;
+                buttonElement.textContent = 'Remove';
+            }
+        }
+
+        async function saveChanges() {
+            if (!hasUnsavedChanges) {
+                showAlert('No changes to save.', 'info');
+                return;
+            }
+
+            const rows = document.querySelectorAll('#itemsTableBody tr');
+            const updates = [];
+
+            rows.forEach(row => {
+                const nameInput = row.querySelector('[data-field="name"]');
+                const quantityInput = row.querySelector('[data-field="quantity"]');
+                const priceInput = row.querySelector('[data-field="price"]');
+                
+                const originalName = nameInput.getAttribute('data-original-value');
+                const currentName = nameInput.value.trim();
+                const currentQuantity = parseFloat(quantityInput.value);
+                const currentPrice = parseFloat(priceInput.value);
+
+                // Check if values changed
+                if (currentName !== originalName || 
+                    currentQuantity !== parseFloat(quantityInput.getAttribute('data-original-value')) ||
+                    currentPrice !== parseFloat(priceInput.getAttribute('data-original-value'))) {
+                    
+                    updates.push({
+                        old_name: originalName,
+                        new_name: currentName,
+                        quantity: currentQuantity,
+                        price: currentPrice
+                    });
+                }
+            });
+
+            if (updates.length === 0) {
+                showAlert('No changes detected.', 'info');
+                return;
+            }
+
+            const saveBtn = document.querySelector('.save-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<div class="loading-spinner"></div> Saving...';
+
+            try {
+                // Process updates sequentially
+                for (const update of updates) {
+                    const response = await fetch(`${CONFIG.backendUrl}/update-item`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(update)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to update ${update.new_name}`);
+                    }
+
+                    const result = await response.json();
+                    currentData = result.summary;
+                }
+
+                // Refresh the display
+                displayFinalResults(currentData);
+                
+                hasUnsavedChanges = false;
+                document.querySelector('.save-btn').style.animation = 'none';
+                showAlert(`✅ All changes saved successfully! Updated ${updates.length} items.`, 'success');
+
+            } catch (error) {
+                console.error('Error saving changes:', error);
+                showAlert(`❌ Error saving changes: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '💾 Save Changes';
+            }
+        }
+
+        function downloadList() {
+            if (!currentData || !currentData.items || currentData.items.length === 0) {
+                showAlert('No data to download. Please process some receipts first.', 'error');
+                return;
+            }
+
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            
+            let content = `SHOPPING SUMMARY REPORT\n`;
+            content += `Generated: ${timestamp}\n`;
+            content += `===========================================\n\n`;
+            
+            content += `SUMMARY STATISTICS:\n`;
+            content += `- Total Items: ${currentData.items.length}\n`;
+            content += `- Total Cost: ₹${currentData.total_cost.toFixed(2)}\n`;
+            content += `- Number of Receipts: ${currentData.receipt_count}\n`;
+            content += `- Average Cost per Item: ₹${(currentData.total_cost / currentData.items.length).toFixed(2)}\n\n`;
+            
+            content += `DETAILED ITEM BREAKDOWN:\n`;
+            content += `===========================================\n`;
+            content += `Item Name                    Qty    Price    Total    Receipts\n`;
+            content += `-----------------------------------------------------------\n`;
+            
+            currentData.items.forEach((item, index) => {
+                const name = item.name.padEnd(25);
+                const qty = item.quantity.toString().padStart(6);
+                const price = `₹${item.average_price.toFixed(2)}`.padStart(8);
+                const total = `₹${item.total_price.toFixed(2)}`.padStart(9);
+                const receipts = item.receipt_count.toString().padStart(8);
+                
+                content += `${name} ${qty} ${price} ${total} ${receipts}\n`;
+            });
+            
+            content += `-----------------------------------------------------------\n`;
+            content += `GRAND TOTAL:                                ₹${currentData.total_cost.toFixed(2)}\n\n`;
+            
+            // Add receipt details if available
+            if (rawReceiptData.length > 0) {
+                content += `RECEIPT DETAILS:\n`;
+                content += `===========================================\n`;
+                rawReceiptData.forEach((receipt, index) => {
+                    content += `Receipt ${index + 1}:\n`;
+                    content += `- Store: ${receipt.store || 'Unknown'}\n`;
+                    content += `- Date: ${receipt.date || 'Unknown'}\n`;
+                    content += `- Items: ${receipt.items ? receipt.items.length : 0}\n`;
+                    if (receipt.items && receipt.items.length > 0) {
+                        receipt.items.forEach(item => {
+                            content += `  * ${item.name} (${item.quantity}x ₹${item.unit_price}) = ₹${item.total_price}\n`;
+                        });
+                    }
+                    content += `\n`;
+                });
+            }
+            
+            content += `\nReport generated by Smart Receipt Processor\n`;
+
+            // Create and download the file
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `shopping_summary_${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}.txt`;
+            
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showAlert('📥 Shopping summary downloaded successfully!', 'success');
+        }
+
+        async function debugData() {
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/debug`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const debugInfo = await response.json();
+                console.log('Debug Data:', debugInfo);
+                
+                const debugOutput = `
+Debug Information:
+- Backend Connected: ${debugInfo.ollama_connected ? 'Yes' : 'No (Ollama may be offline)'}
+- Receipts Count: ${debugInfo.receipts_count}
+- Combined Items Count: ${debugInfo.combined_items_count}
+- Summary Items: ${debugInfo.summary?.items?.length || 0}
+- Total Cost: ₹${debugInfo.summary?.total_cost || 0}
+
+Recent Receipts:
+${debugInfo.receipts?.map(r => `- ${r.store} (${r.date}) - ${r.items_count} items`).join('\n') || 'None'}
+
+Combined Items: ${Object.values(debugInfo.combined_items || {}).join(', ') || 'None'}
+
+${!debugInfo.ollama_connected ? '\n⚠️ Ollama is not connected. Make sure Ollama is running with llama3.2-vision and mistral models.' : ''}
+                `;
+                
+                alert(debugOutput);
+                
+            } catch (error) {
+                console.error('Debug error:', error);
+                showAlert('Debug request failed: ' + error.message, 'error');
+            }
+        }
+
+        async function clearAll() {
+            if (!confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${CONFIG.backendUrl}/clear`, { 
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Reset UI
+                selectedFiles = [];
+                currentData = null;
+                isProcessing = false;
+                hasUnsavedChanges = false;
+                individualResultCards = {};
+                rawReceiptData = [];
+                document.getElementById('fileInput').value = '';
+                updateFileList();
+                updateProcessButton();
+                document.getElementById('progressSection').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'none';
+                document.getElementById('individualResults').innerHTML = '';
+                document.querySelector('.save-btn').style.animation = 'none';
+                
+                showAlert('✅ All data cleared successfully!', 'success');
+
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                showAlert(`❌ Error clearing data: ${error.message}`, 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // Create new alert
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            // Insert after main content header
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(alert, mainContent.firstChild);
+
+            // Auto-remove after timeout
+            const timeout = type === 'error' ? 8000 : 5000;
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, timeout);
+        }
+
+        // Initialize and check connection on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProcessButton();
+            checkConnection();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 'u':
+                            e.preventDefault();
+                            if (!isProcessing) {
+                                document.getElementById('fileInput').click();
+                            }
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (!document.getElementById('processBtn').disabled && !isProcessing) {
+                                processReceiptsProgressive();
+                            }
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            if (hasUnsavedChanges) {
+                                saveChanges();
+                            }
+                            break;
+                    }
+                }
+            });
+
+            // Warn about unsaved changes
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+
+            // Add tooltips
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                if (button.textContent.includes('Select Files')) {
+                    button.title = 'Ctrl+U: Select receipt images';
+                } else if (button.textContent.includes('Process Receipts')) {
+                    button.title = 'Ctrl+Enter: Process selected receipts progressively';
+                } else if (button.textContent.includes('Save Changes')) {
+                    button.title = 'Ctrl+S: Save all changes';
+                }
+            });
+
+            // Periodic connection check
+            setInterval(checkConnection, 30000); // Check every 30 seconds
+        });
+    </script>
+</body>
+</html>

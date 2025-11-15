@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Processor - Professional Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #e8ecff 0%, #d8e2ff 100%);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.drag-over {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #f0fff4 0%, #e8f5e8 100%);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .upload-subtext {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .processing-status {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .receipts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .receipt-cards {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .receipt-cards h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .receipt-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .receipt-store {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .receipt-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .receipt-items {
+            list-style: none;
+        }
+
+        .receipt-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .receipt-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .item-details {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .item-quantity, .item-price {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .summary-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-title-section h2 {
+            color: #333;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .btn-update:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+        }
+
+        .summary-stats {
+            display: flex;
+            gap: 20px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            padding: 15px;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .summary-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+        }
+
+        .summary-table th:first-child { border-radius: 8px 0 0 0; }
+        .summary-table th:last-child { border-radius: 0 8px 0 0; }
+
+        .summary-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .editable-input {
+            border: 1px solid transparent;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            width: 100%;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .editable-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .btn-remove {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-remove:hover {
+            background: #ff5252;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .receipts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .summary-title-section {
+                align-items: center;
+                text-align: center;
+            }
+            
+            .summary-actions {
+                justify-content: center;
+            }
+            
+            .summary-stats {
+                justify-content: space-around;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #4CAF50;
+        }
+
+        .notification.error {
+            background: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Receipt Processor</h1>
+            <p>Upload receipt images and extract itemized data with AI-powered OCR</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Drop receipt images here or click to browse</div>
+                <div class="upload-subtext">Supports JPG, PNG files. Multiple files allowed.</div>
+                <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="document.getElementById('fileInput').click()">
+                    Choose Files
+                </button>
+                <button class="btn btn-danger" onclick="clearAllData()">
+                    Clear All Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Processing Status -->
+        <div class="processing-status" id="processingStatus">
+            <h3>Processing Receipts...</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="processingText">Preparing to process files...</div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="receipts-section">
+            <!-- Individual Receipt Cards -->
+            <div class="receipt-cards">
+                <h2>Individual Receipts</h2>
+                <div id="receiptCardsContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🧾</div>
+                        <p>No receipts uploaded yet</p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Upload receipt images to see individual receipt cards here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <div class="summary-title-section">
+                        <h2>Summary Table</h2>
+                        <div class="summary-actions">
+                            <button class="btn btn-update" onclick="updateAllData()">
+                                🔄 Update Data
+                            </button>
+                            <button class="btn btn-download" onclick="downloadSummary()">
+                                📥 Download Summary
+                            </button>
+                        </div>
+                    </div>
+                    <div class="summary-stats" id="summaryStats">
+                        <div class="stat">
+                            <div class="stat-value" id="totalItems">0</div>
+                            <div class="stat-label">Items</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="totalReceipts">0</div>
+                            <div class="stat-label">Receipts</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="totalCost">₹0.00</div>
+                            <div class="stat-label">Total Cost</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="summaryTableContainer">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No items to display</p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Process some receipts to see the summary table</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let receiptsData = [];
+        let summaryData = { items: [], total_cost: 0, receipt_count: 0 };
+        
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            if (files.length > 0) {
+                processFiles(files);
+            }
+        }
+        
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                processFiles(files);
+            }
+        }
+        
+        async function processFiles(files) {
+            const formData = new FormData();
+            files.forEach(file => formData.append('files', file));
+            
+            showProcessingStatus();
+            
+            try {
+                const response = await fetch('/upload-progressive', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const text = decoder.decode(value);
+                    const lines = text.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                handleProgressiveResponse(data);
+                            } catch (e) {
+                                console.error('Failed to parse SSE data:', e);
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error processing files:', error);
+                showNotification('Error processing files: ' + error.message, 'error');
+                hideProcessingStatus();
+            }
+        }
+        
+        function handleProgressiveResponse(data) {
+            switch (data.type) {
+                case 'progress':
+                    updateProgress(data);
+                    break;
+                case 'individual_result':
+                    handleIndividualResult(data);
+                    break;
+                case 'complete':
+                    handleCompleteResponse(data);
+                    break;
+            }
+        }
+        
+        function updateProgress(data) {
+            const percentage = (data.current / data.total) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('processingText').textContent = 
+                `Processing ${data.filename} (${data.current}/${data.total})`;
+        }
+        
+        function handleIndividualResult(data) {
+            const result = data.result;
+            const summary = data.summary;
+            
+            if (result.status === 'success') {
+                // Clean item names before adding to receipts data
+                const cleanedItems = (result.items || []).map(item => ({
+                    ...item,
+                    name: cleanItemName(item.name) || item.name,
+                    quantity: item.quantity || 1,
+                    unit_price: item.unit_price || 0,
+                    total_price: item.total_price || (item.quantity * item.unit_price)
+                }));
+                
+                // Add to receipts data
+                receiptsData.push({
+                    filename: result.filename,
+                    store: result.store || 'Unknown Store',
+                    date: result.date || 'Unknown Date',
+                    items: cleanedItems
+                });
+                
+                // Update receipt cards
+                updateReceiptCards();
+                
+                showNotification(`Successfully processed ${result.filename}`, 'success');
+            } else {
+                showNotification(`Failed to process ${result.filename}: ${result.message}`, 'error');
+            }
+            
+            // Update summary with latest data
+            if (summary && summary.items) {
+                summaryData = summary;
+                updateSummaryDisplay();
+            }
+        }
+        
+        function handleCompleteResponse(data) {
+            hideProcessingStatus();
+            
+            const successCount = data.processing_results.filter(r => r.status === 'success').length;
+            const totalCount = data.processing_results.length;
+            
+            showNotification(`Processing complete: ${successCount}/${totalCount} files processed successfully`, 'success');
+            
+            // Reset file input
+            fileInput.value = '';
+        }
+        
+        function cleanItemName(rawName) {
+            if (!rawName) return '';
+            
+            let cleaned = String(rawName).trim();
+            
+            // Remove quotes at beginning and end
+            cleaned = cleaned.replace(/^["']|["']$/g, '');
+            
+            // Remove price patterns (₹123.00, $123, etc.)
+            cleaned = cleaned.replace(/[₹$€£]\d+\.?\d*/g, '');
+            
+            // Remove pipe and everything after it
+            if (cleaned.includes('|')) {
+                cleaned = cleaned.split('|')[0];
+            }
+            
+            // Remove standalone numbers that look like prices
+            cleaned = cleaned.replace(/\|\d+\.?\d*$/g, '');
+            cleaned = cleaned.replace(/\d{4,}\.?\d*$/g, '');
+            
+            // Clean up extra whitespace
+            cleaned = cleaned.replace(/\s+/g, ' ').trim();
+            
+            return cleaned;
+        }
+
+        function updateReceiptCards() {
+            const container = document.getElementById('receiptCardsContainer');
+            
+            if (receiptsData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🧾</div>
+                        <p>No receipts uploaded yet</p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Upload receipt images to see individual receipt cards here</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = receiptsData.map((receipt, index) => `
+                <div class="receipt-card" data-receipt-index="${index}">
+                    <div class="receipt-header">
+                        <div>
+                            <div class="receipt-store">${receipt.store}</div>
+                            <div class="receipt-date">${receipt.date}</div>
+                        </div>
+                    </div>
+                    <ul class="receipt-items">
+                        ${receipt.items.map((item, itemIndex) => {
+                            const cleanName = cleanItemName(item.name);
+                            const displayName = cleanName || item.name;
+                            return `
+                            <li class="receipt-item" data-item-name="${displayName}" data-original-name="${item.name}">
+                                <span class="item-name">${displayName}</span>
+                                <div class="item-details">
+                                    <span class="item-quantity">Qty: ${item.quantity}</span>
+                                    <span class="item-price">₹${(item.unit_price || 0).toFixed(2)}</span>
+                                </div>
+                            </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+        
+        function updateSummaryDisplay() {
+            // Update stats
+            document.getElementById('totalItems').textContent = summaryData.items.length;
+            document.getElementById('totalReceipts').textContent = summaryData.receipt_count;
+            document.getElementById('totalCost').textContent = `₹${(summaryData.total_cost || 0).toFixed(2)}`;
+            
+            // Update table
+            const tableContainer = document.getElementById('summaryTableContainer');
+            
+            if (!summaryData.items || summaryData.items.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No items to display</p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Process some receipts to see the summary table</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Filter out items with invalid data and clean names
+            const validItems = summaryData.items.filter(item => {
+                const cleanName = cleanItemName(item.name);
+                return cleanName && cleanName.length > 0 && item.quantity > 0;
+            });
+            
+            if (validItems.length === 0) {
+                tableContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        <p>No valid items to display</p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Items may need cleaning or processing</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            tableContainer.innerHTML = `
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${validItems.map(item => {
+                            const cleanName = cleanItemName(item.name);
+                            const displayName = cleanName || item.name;
+                            const safeQuantity = item.quantity || item.total_quantity || 1;
+                            const safePrice = item.average_price || item.unit_price || 0;
+                            const safeTotalPrice = item.total_price || (safeQuantity * safePrice);
+                            
+                            return `
+                            <tr data-item-id="${item.id || ''}" data-item-name="${displayName}" data-original-name="${item.name}">
+                                <td>
+                                    <input type="text" class="editable-input" value="${displayName}" 
+                                           onchange="updateItemField('${item.name}', 'name', this.value)">
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-input" value="${safeQuantity}" min="0" step="0.1"
+                                           onchange="updateItemField('${item.name}', 'quantity', parseFloat(this.value))">
+                                </td>
+                                <td>
+                                    <input type="number" class="editable-input" value="${safePrice}" min="0" step="0.01"
+                                           onchange="updateItemField('${item.name}', 'price', parseFloat(this.value))">
+                                </td>
+                                <td>₹${safeTotalPrice.toFixed(2)}</td>
+                                <td class="item-actions">
+                                    <button class="btn btn-small btn-remove" onclick="removeItem('${item.name}')">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        async function updateItemField(oldName, field, newValue) {
+            if (!newValue || newValue <= 0) {
+                showNotification('Invalid value. Please enter a positive number.', 'error');
+                return;
+            }
+            
+            // Find current item data
+            const currentItem = summaryData.items.find(item => item.name === oldName);
+            if (!currentItem) {
+                showNotification('Item not found', 'error');
+                return;
+            }
+            
+            // Prepare update data
+            const updateData = {
+                old_name: oldName,
+                new_name: field === 'name' ? newValue : oldName,
+                quantity: field === 'quantity' ? newValue : currentItem.quantity,
+                price: field === 'price' ? newValue : currentItem.average_price
+            };
+            
+            try {
+                const response = await fetch('/update-item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                summaryData = data.summary;
+                
+                // Update both summary table and receipt cards
+                updateSummaryDisplay();
+                updateReceiptCardsForItem(oldName, updateData.new_name, updateData.quantity, updateData.price);
+                
+                showNotification('Item updated successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error updating item:', error);
+                showNotification('Failed to update item: ' + error.message, 'error');
+                // Refresh to revert changes
+                await refreshSummary();
+            }
+        }
+        
+        function updateReceiptCardsForItem(oldName, newName, quantity, price) {
+            // Clean the names for better matching
+            const cleanOldName = cleanItemName(oldName);
+            const cleanNewName = cleanItemName(newName);
+            
+            // Update all receipt cards that contain this item (try both original and cleaned names)
+            const receiptItems = document.querySelectorAll(
+                `[data-item-name="${oldName}"], [data-item-name="${cleanOldName}"], [data-original-name="${oldName}"]`
+            );
+            
+            receiptItems.forEach(itemElement => {
+                // Update the data attributes
+                itemElement.setAttribute('data-item-name', newName);
+                itemElement.setAttribute('data-original-name', oldName);
+                
+                // Update the displayed name
+                const nameElement = itemElement.querySelector('.item-name');
+                if (nameElement) {
+                    nameElement.textContent = cleanNewName || newName;
+                }
+                
+                // Update quantity and price
+                const quantityElement = itemElement.querySelector('.item-quantity');
+                const priceElement = itemElement.querySelector('.item-price');
+                
+                if (quantityElement) {
+                    quantityElement.textContent = `Qty: ${quantity}`;
+                }
+                
+                if (priceElement) {
+                    priceElement.textContent = `₹${price.toFixed(2)}`;
+                }
+            });
+            
+            // Also update the receiptsData for consistency
+            receiptsData.forEach(receipt => {
+                receipt.items.forEach(item => {
+                    const cleanItemName = cleanItemName(item.name);
+                    if (item.name === oldName || cleanItemName === cleanOldName) {
+                        item.name = newName;
+                        item.quantity = quantity;
+                        item.unit_price = price;
+                        item.total_price = quantity * price;
+                    }
+                });
+            });
+        }
+        
+        async function removeItem(itemName) {
+            if (!confirm(`Are you sure you want to remove "${itemName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/remove-item', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ item_name: itemName })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                summaryData = data.summary;
+                
+                // Remove from receipt cards
+                const receiptItems = document.querySelectorAll(`[data-item-name="${itemName}"]`);
+                receiptItems.forEach(item => item.remove());
+                
+                // Update displays
+                updateSummaryDisplay();
+                
+                showNotification('Item removed successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showNotification('Failed to remove item: ' + error.message, 'error');
+            }
+        }
+        
+        async function clearAllData() {
+            if (!confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/clear', { method: 'DELETE' });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Reset local data
+                receiptsData = [];
+                summaryData = { items: [], total_cost: 0, receipt_count: 0 };
+                
+                // Update displays
+                updateReceiptCards();
+                updateSummaryDisplay();
+                
+                showNotification('All data cleared successfully', 'success');
+                
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                showNotification('Failed to clear data: ' + error.message, 'error');
+            }
+        }
+        
+        async function updateAllData() {
+            try {
+                showNotification('Updating data...', 'success');
+                
+                // Show loading state on update button
+                const updateBtn = document.querySelector('.btn-update');
+                const originalText = updateBtn.innerHTML;
+                updateBtn.innerHTML = '🔄 Updating...';
+                updateBtn.disabled = true;
+                
+                // Fetch fresh summary data from backend
+                const response = await fetch('/summary');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const freshSummaryData = await response.json();
+                summaryData = freshSummaryData;
+                
+                // Update summary table display
+                updateSummaryDisplay();
+                
+                // Update ALL receipt cards with fresh data
+                updateAllReceiptCardsWithFreshData();
+                
+                showNotification('Data updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating data:', error);
+                showNotification('Failed to update data: ' + error.message, 'error');
+            } finally {
+                // Reset update button
+                const updateBtn = document.querySelector('.btn-update');
+                updateBtn.innerHTML = '🔄 Update Data';
+                updateBtn.disabled = false;
+            }
+        }
+        
+        function updateAllReceiptCardsWithFreshData() {
+            // Create a map of item names to their current summary data for fast lookup
+            const summaryItemsMap = new Map();
+            
+            if (summaryData.items) {
+                summaryData.items.forEach(summaryItem => {
+                    const cleanName = cleanItemName(summaryItem.name);
+                    const originalName = summaryItem.name;
+                    
+                    // Map both cleaned and original names to the summary item
+                    summaryItemsMap.set(cleanName.toLowerCase(), summaryItem);
+                    summaryItemsMap.set(originalName.toLowerCase(), summaryItem);
+                });
+            }
+            
+            // Update each receipt card's items
+            receiptsData.forEach((receipt, receiptIndex) => {
+                receipt.items.forEach((receiptItem, itemIndex) => {
+                    const cleanReceiptItemName = cleanItemName(receiptItem.name);
+                    
+                    // Try to find matching summary item
+                    let matchingSummaryItem = summaryItemsMap.get(cleanReceiptItemName.toLowerCase()) ||
+                                            summaryItemsMap.get(receiptItem.name.toLowerCase());
+                    
+                    if (matchingSummaryItem) {
+                        // Update the receipt item with fresh data from summary
+                        receiptItem.quantity = matchingSummaryItem.quantity || matchingSummaryItem.total_quantity || receiptItem.quantity;
+                        receiptItem.unit_price = matchingSummaryItem.average_price || matchingSummaryItem.unit_price || receiptItem.unit_price;
+                        receiptItem.total_price = receiptItem.quantity * receiptItem.unit_price;
+                        
+                        // Update the name to match summary (in case it was cleaned/edited)
+                        const summaryDisplayName = cleanItemName(matchingSummaryItem.name) || matchingSummaryItem.name;
+                        receiptItem.name = summaryDisplayName;
+                    }
+                });
+            });
+            
+            // Re-render receipt cards with updated data
+            updateReceiptCards();
+        }
+        
+        function downloadSummary() {
+            try {
+                if (!summaryData.items || summaryData.items.length === 0) {
+                    showNotification('No data to download', 'error');
+                    return;
+                }
+                
+                // Prepare CSV data
+                const csvData = [];
+                
+                // Add header
+                csvData.push(['Item Name', 'Quantity', 'Unit Price', 'Total Price']);
+                
+                // Add data rows
+                summaryData.items.forEach(item => {
+                    const cleanName = cleanItemName(item.name) || item.name;
+                    const quantity = item.quantity || item.total_quantity || 0;
+                    const unitPrice = item.average_price || item.unit_price || 0;
+                    const totalPrice = item.total_price || (quantity * unitPrice);
+                    
+                    csvData.push([
+                        cleanName,
+                        quantity,
+                        unitPrice.toFixed(2),
+                        totalPrice.toFixed(2)
+                    ]);
+                });
+                
+                // Add summary row
+                csvData.push([]);
+                csvData.push(['TOTAL', '', '', summaryData.total_cost.toFixed(2)]);
+                csvData.push(['Total Items:', summaryData.items.length, '', '']);
+                csvData.push(['Total Receipts:', summaryData.receipt_count, '', '']);
+                
+                // Convert to CSV string
+                const csvString = csvData.map(row => 
+                    row.map(cell => {
+                        // Escape quotes and wrap in quotes if contains comma
+                        const cellStr = String(cell || '');
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            return '"' + cellStr.replace(/"/g, '""') + '"';
+                        }
+                        return cellStr;
+                    }).join(',')
+                ).join('\n');
+                
+                // Create and download file
+                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    
+                    // Generate filename with current date
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    link.setAttribute('download', `receipt_summary_${dateStr}.csv`);
+                    
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    showNotification('Summary downloaded successfully!', 'success');
+                } else {
+                    showNotification('Download not supported in this browser', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error downloading summary:', error);
+                showNotification('Failed to download summary: ' + error.message, 'error');
+            }
+        }
+        
+        function showProcessingStatus() {
+            document.getElementById('processingStatus').style.display = 'block';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('processingText').textContent = 'Preparing to process files...';
+        }
+        
+        function hideProcessingStatus() {
+            document.getElementById('processingStatus').style.display = 'none';
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAllData(); // Use the new comprehensive update function
+        });
+    </script>
